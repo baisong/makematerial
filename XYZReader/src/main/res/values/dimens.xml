@@ -7,5 +7,8 @@
     <dimen name="fab_elevation">2dp</dimen>
     <dimen name="fab_press_translation_z">6dp</dimen>
     <dimen name="fab_margin">24dp</dimen>
+    <dimen name="list_item_margin">0dp</dimen>
+    <dimen name="thumbnail_width">180dp</dimen>
+    <dimen name="thumbnail_height">240dp</dimen>
 
 </resources>
