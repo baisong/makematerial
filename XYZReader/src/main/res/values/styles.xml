@@ -5,14 +5,16 @@
         <item name="android:colorPrimaryDark">@color/deep_orange_900</item>
         <item name="android:textColorPrimaryInverse">@color/deep_orange_300</item>
         <item name="android:colorAccent">@color/green_a400</item>
+        <item name="android:toolbarStyle">@style/MyActionBar</item>
     </style>
 
     <style name="Theme.Xyz.Detail">
         <!--<item name="android:statusBarColor">@android:color/transparent</item> -->
     </style>
 
-    <style name="MyActionBar"><!-- parent="@android:style/Widget.Holo.Light.ActionBar" -->
+    <style name="MyActionBar" parent="Theme.Xyz"><!-- parent="@android:style/Widget.Holo.Light.ActionBar" -->
         <item name="android:background">@color/colorPrimary</item>
+        <item name="android:windowActionBar">false</item>
     </style>
 
 </resources>

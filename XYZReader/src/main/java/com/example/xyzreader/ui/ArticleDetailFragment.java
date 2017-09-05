@@ -1,5 +1,6 @@
 package com.example.xyzreader.ui;
 
+import android.animation.ObjectAnimator;
 import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Intent;
@@ -8,10 +9,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.Spanned;
@@ -21,6 +23,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,6 +36,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
+
+import static android.view.View.GONE;
 
 /**
  * A fragment representing a single Article detail screen. This fragment is
@@ -66,11 +71,7 @@ public class ArticleDetailFragment extends Fragment implements
     private SimpleDateFormat outputFormat = new SimpleDateFormat();
     // Most time functions can only handle 1902 - 2037
     private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2,1,1);
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
+    
     public ArticleDetailFragment() {
     }
 
@@ -150,6 +151,32 @@ public class ArticleDetailFragment extends Fragment implements
             }
         });
 
+        mRootView.findViewById(R.id.load_fab).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final ImageButton fabShare = (ImageButton) mRootView.findViewById(R.id.share_fab);
+                final ImageButton fabLoad = (ImageButton) mRootView.findViewById(R.id.load_fab);
+                TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
+                DrawInsetsFrameLayout activityView = (DrawInsetsFrameLayout) mRootView.findViewById(R.id.draw_insets_frame_layout);
+
+                bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n)", "<br />")));
+                fabLoad.setVisibility(View.GONE);
+                Snackbar mySnackbar = Snackbar.make(activityView,
+                        R.string.full_article_loaded, Snackbar.LENGTH_SHORT);
+                mySnackbar.addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                        int newY = (int) fabShare.getY() + 300;
+                        ObjectAnimator moveAnim = ObjectAnimator.ofFloat(fabShare, "Y", newY);
+                        moveAnim.setDuration(300);
+                        moveAnim.setInterpolator(new FastOutSlowInInterpolator());
+                        moveAnim.start();
+                    }
+                });
+                mySnackbar.show();
+            }
+        });
+
         bindViews();
         updateStatusBar();
         return mRootView;
@@ -215,10 +242,6 @@ public class ArticleDetailFragment extends Fragment implements
         TextView bylineView = (TextView) mRootView.findViewById(R.id.article_byline);
         bylineView.setMovementMethod(new LinkMovementMethod());
         TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
-
-
-        bodyView.setTypeface(Typeface.createFromAsset(getResources().getAssets(), "Rosario-Regular.ttf"));
-
         if (mCursor != null) {
             mRootView.setAlpha(0);
             mRootView.setVisibility(View.VISIBLE);
@@ -243,7 +266,7 @@ public class ArticleDetailFragment extends Fragment implements
                                 + "</font>"));
 
             }
-            bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n|\n)", "<br />")));
+            bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).substring(0,200)) + "...");
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
                         @Override
@@ -265,7 +288,7 @@ public class ArticleDetailFragment extends Fragment implements
                         }
                     });
         } else {
-            mRootView.setVisibility(View.GONE);
+            mRootView.setVisibility(GONE);
             titleView.setText("N/A");
             bylineView.setText("N/A" );
             bodyView.setText("N/A");

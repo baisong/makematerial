@@ -8,5 +8,7 @@
     <string name="action_share">Share</string>
 
     <string name="up">Up</string>
+    <string name="action_load_full_article">Load full story</string>
+    <string name="full_article_loaded">Story loaded for reading. Enjoy!</string>
 
 </resources>
