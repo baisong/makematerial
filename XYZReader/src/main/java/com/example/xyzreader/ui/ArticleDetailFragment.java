@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
@@ -23,7 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -71,7 +72,7 @@ public class ArticleDetailFragment extends Fragment implements
     private SimpleDateFormat outputFormat = new SimpleDateFormat();
     // Most time functions can only handle 1902 - 2037
     private GregorianCalendar START_OF_EPOCH = new GregorianCalendar(2,1,1);
-    
+
     public ArticleDetailFragment() {
     }
 
@@ -154,15 +155,16 @@ public class ArticleDetailFragment extends Fragment implements
         mRootView.findViewById(R.id.load_fab).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final ImageButton fabShare = (ImageButton) mRootView.findViewById(R.id.share_fab);
-                final ImageButton fabLoad = (ImageButton) mRootView.findViewById(R.id.load_fab);
+                final FloatingActionButton fabShare = (FloatingActionButton) mRootView.findViewById(R.id.share_fab);
+                final FloatingActionButton fabLoad = (FloatingActionButton) mRootView.findViewById(R.id.load_fab);
+                final MaxWidthLinearLayout scrollView = (MaxWidthLinearLayout) mRootView.findViewById(R.id.article_container);
                 TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
                 DrawInsetsFrameLayout activityView = (DrawInsetsFrameLayout) mRootView.findViewById(R.id.draw_insets_frame_layout);
 
                 bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n)", "<br />")));
                 fabLoad.setVisibility(View.GONE);
                 Snackbar mySnackbar = Snackbar.make(activityView,
-                        R.string.full_article_loaded, Snackbar.LENGTH_SHORT);
+                        R.string.full_article_loaded, Snackbar.LENGTH_LONG);
                 mySnackbar.addCallback(new Snackbar.Callback() {
                     @Override
                     public void onDismissed(Snackbar snackbar, int event) {
@@ -170,6 +172,12 @@ public class ArticleDetailFragment extends Fragment implements
                         ObjectAnimator moveAnim = ObjectAnimator.ofFloat(fabShare, "Y", newY);
                         moveAnim.setDuration(300);
                         moveAnim.setInterpolator(new FastOutSlowInInterpolator());
+                        moveAnim.start();
+
+                        newY = getResources().getInteger(R.integer.app_bar_height);
+                        moveAnim = ObjectAnimator.ofFloat(scrollView, "Y", newY);
+                        moveAnim.setDuration(500);
+                        moveAnim.setInterpolator(new AccelerateDecelerateInterpolator());
                         moveAnim.start();
                     }
                 });
@@ -329,10 +337,9 @@ public class ArticleDetailFragment extends Fragment implements
         if (mPhotoContainerView == null || mPhotoView.getHeight() == 0) {
             return Integer.MAX_VALUE;
         }
-
-        // account for parallax
-        return mIsCard
-                ? (int) mPhotoContainerView.getTranslationY() + mPhotoView.getHeight() - mScrollY
-                : mPhotoView.getHeight() - mScrollY;
+        if (mIsCard) {
+            return (int) mPhotoContainerView.getTranslationY() + mPhotoView.getHeight() - mScrollY;
+        }
+        return mPhotoView.getHeight() - mScrollY;
     }
 }
