@@ -1,19 +1,13 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.Xyz" parent="@style/Theme.AppCompat.Light.NoActionBar">
-        <item name="android:colorPrimary">@color/deep_orange_800</item>
-        <item name="android:colorPrimaryDark">@color/deep_orange_900</item>
-        <item name="android:textColorPrimaryInverse">@color/deep_orange_300</item>
-        <item name="android:colorAccent">@color/green_a400</item>
+        <item name="colorPrimary">@color/deep_orange_500</item>
+        <item name="colorPrimaryDark">@color/deep_orange_700</item>
+        <item name="colorAccent">@color/green_a200</item>
         <item name="android:toolbarStyle">@style/MyActionBar</item>
     </style>
 
-    <style name="Theme.Xyz.Detail">
-        <!--<item name="android:statusBarColor">@android:color/transparent</item> -->
-    </style>
-
-    <style name="MyActionBar" parent="Theme.Xyz"><!-- parent="@android:style/Widget.Holo.Light.ActionBar" -->
-        <item name="android:background">@color/colorPrimary</item>
+    <style name="MyActionBar" parent="Theme.Xyz">
         <item name="android:windowActionBar">false</item>
     </style>
 

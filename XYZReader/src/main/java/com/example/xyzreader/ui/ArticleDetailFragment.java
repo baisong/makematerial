@@ -161,20 +161,15 @@ public class ArticleDetailFragment extends Fragment implements
                 DrawInsetsFrameLayout activityView = (DrawInsetsFrameLayout) mRootView.findViewById(R.id.draw_insets_frame_layout);
 
                 bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n)", "<br />")));
-                loadBtn.setVisibility(View.GONE);
+                loadBtn.setVisibility(View.INVISIBLE);
                 Snackbar mySnackbar = Snackbar.make(activityView,
                         R.string.full_article_loaded, Snackbar.LENGTH_LONG);
-                mySnackbar.addCallback(new Snackbar.Callback() {
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-                        int newY = getResources().getInteger(R.integer.app_bar_height);
-                        ObjectAnimator moveAnim = ObjectAnimator.ofFloat(scrollView, "Y", newY);
-                        moveAnim.setDuration(500);
-                        moveAnim.setInterpolator(new AccelerateDecelerateInterpolator());
-                        moveAnim.start();
-                    }
-                });
                 mySnackbar.show();
+                int newY = getResources().getInteger(R.integer.app_bar_height);
+                ObjectAnimator moveAnim = ObjectAnimator.ofFloat(scrollView, "Y", newY);
+                moveAnim.setDuration(500);
+                moveAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+                moveAnim.start();
             }
         });
 
@@ -267,14 +262,14 @@ public class ArticleDetailFragment extends Fragment implements
                                 + "</font>"));
 
             }
-            bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY)));
+            bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).substring(0,200)) + "...");
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
                         @Override
                         public void onResponse(ImageLoader.ImageContainer imageContainer, boolean b) {
                             Bitmap bitmap = imageContainer.getBitmap();
                             if (bitmap != null) {
-                                Palette p = Palette.generate(bitmap, 12);
+                                Palette p = Palette.from(bitmap).generate();
                                 mMutedColor = p.getDarkMutedColor(0xFF333333);
                                 mPhotoView.setImageBitmap(imageContainer.getBitmap());
                                 mRootView.findViewById(R.id.meta_bar)

@@ -11,8 +11,8 @@ import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.format.DateUtils;
@@ -43,7 +43,6 @@ public class ArticleListActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = ArticleListActivity.class.toString();
-    private static final float THUMBNAIL_ASPECT_RATIO = 0.75f;
     private Toolbar mToolbar;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerView;
@@ -60,17 +59,15 @@ public class ArticleListActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article_list);
         mToolbar = (Toolbar) findViewById(toolbar);
-        //setSupportActionBar(mToolbar);
-        //getSupportActionBar().setDisplayShowTitleEnabled(false);
-        //toolbar.setNavigationIcon(R.drawable.ic_toolbar);
-        //mToolbar.setTitle("");
-        //mToolbar.setSubtitle("");
         mToolbar.setLogo(R.drawable.logo);
         mAppBar = (AppBarLayout) findViewById(R.id.appbar);
-        //mAppBar.setVisibility(View.GONE);
-        //mAppBar.setBackground(getDrawable(R.drawable.logo));
-        //mAppBar.setTitleEnabled(false);
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                updateRefreshingUI();
+            }
+        });
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         getLoaderManager().initLoader(0, null, this);
         if (savedInstanceState == null) {
@@ -122,11 +119,11 @@ public class ArticleListActivity extends AppCompatActivity implements
         adapter.setHasStableIds(true);
         mRecyclerView.setAdapter(adapter);
         int columnCount = getResources().getInteger(R.integer.list_column_count);
-        //StaggeredGridLayoutManager sglm =
-        //        new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
+        StaggeredGridLayoutManager sglm =
+                new StaggeredGridLayoutManager(columnCount, StaggeredGridLayoutManager.VERTICAL);
         //LinearLayoutManager m = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        GridLayoutManager m = new GridLayoutManager(this, getResources().getInteger(R.integer.list_column_count));
-        mRecyclerView.setLayoutManager(m);
+        //GridLayoutManager m = new GridLayoutManager(this, getResources().getInteger(R.integer.list_column_count));
+        mRecyclerView.setLayoutManager(sglm);
     }
 
     @Override
@@ -192,12 +189,14 @@ public class ArticleListActivity extends AppCompatActivity implements
                                 + "<br/>" + " by "
                                 + mCursor.getString(ArticleLoader.Query.AUTHOR)));
             }
-
             holder.thumbnailView.setImageUrl(
                     mCursor.getString(ArticleLoader.Query.THUMB_URL),
                     ImageLoaderHelper.getInstance(ArticleListActivity.this).getImageLoader());
-            //holder.thumbnailView.setAspectRatio(THUMBNAIL_ASPECT_RATIO);
-            //holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
+            holder.thumbnailView.setAspectRatio(mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO));
+            float width = holder.thumbnailView.getWidth();
+            holder.thumbnailView.getLayoutParams().height = ((int) ((float) width / mCursor.getFloat(ArticleLoader.Query.ASPECT_RATIO)));
+            holder.thumbnailView.requestLayout();
+            holder.thumbnailView.invalidate();
         }
 
         @Override
