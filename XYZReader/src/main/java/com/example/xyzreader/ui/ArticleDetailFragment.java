@@ -11,10 +11,8 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ShareCompat;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.graphics.Palette;
 import android.text.Html;
 import android.text.Spanned;
@@ -25,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -152,30 +151,24 @@ public class ArticleDetailFragment extends Fragment implements
             }
         });
 
-        mRootView.findViewById(R.id.load_fab).setOnClickListener(new View.OnClickListener() {
+        mRootView.findViewById(R.id.btn_load).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final FloatingActionButton fabShare = (FloatingActionButton) mRootView.findViewById(R.id.share_fab);
-                final FloatingActionButton fabLoad = (FloatingActionButton) mRootView.findViewById(R.id.load_fab);
+                final Button loadBtn = (Button) mRootView.findViewById(R.id.btn_load);
+                //final FloatingActionButton fabShare = (FloatingActionButton) mRootView.findViewById(R.id.share_fab);
                 final MaxWidthLinearLayout scrollView = (MaxWidthLinearLayout) mRootView.findViewById(R.id.article_container);
                 TextView bodyView = (TextView) mRootView.findViewById(R.id.article_body);
                 DrawInsetsFrameLayout activityView = (DrawInsetsFrameLayout) mRootView.findViewById(R.id.draw_insets_frame_layout);
 
                 bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).replaceAll("(\r\n)", "<br />")));
-                fabLoad.setVisibility(View.GONE);
+                loadBtn.setVisibility(View.GONE);
                 Snackbar mySnackbar = Snackbar.make(activityView,
                         R.string.full_article_loaded, Snackbar.LENGTH_LONG);
                 mySnackbar.addCallback(new Snackbar.Callback() {
                     @Override
                     public void onDismissed(Snackbar snackbar, int event) {
-                        int newY = (int) fabShare.getY() + 300;
-                        ObjectAnimator moveAnim = ObjectAnimator.ofFloat(fabShare, "Y", newY);
-                        moveAnim.setDuration(300);
-                        moveAnim.setInterpolator(new FastOutSlowInInterpolator());
-                        moveAnim.start();
-
-                        newY = getResources().getInteger(R.integer.app_bar_height);
-                        moveAnim = ObjectAnimator.ofFloat(scrollView, "Y", newY);
+                        int newY = getResources().getInteger(R.integer.app_bar_height);
+                        ObjectAnimator moveAnim = ObjectAnimator.ofFloat(scrollView, "Y", newY);
                         moveAnim.setDuration(500);
                         moveAnim.setInterpolator(new AccelerateDecelerateInterpolator());
                         moveAnim.start();
@@ -274,7 +267,7 @@ public class ArticleDetailFragment extends Fragment implements
                                 + "</font>"));
 
             }
-            bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY).substring(0,200)) + "...");
+            bodyView.setText(fromHtml(mCursor.getString(ArticleLoader.Query.BODY)));
             ImageLoaderHelper.getInstance(getActivity()).getImageLoader()
                     .get(mCursor.getString(ArticleLoader.Query.PHOTO_URL), new ImageLoader.ImageListener() {
                         @Override
